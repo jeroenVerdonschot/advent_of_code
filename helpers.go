@@ -159,3 +159,18 @@ func makeMatrixOfInts(str string) Maxtrix {
 	}
 	return matrix
 }
+
+func stringToMatrix(str string) [][]string {
+	rows := strings.Split(str, "\n")
+	matrix := make([][]string, len(rows))
+	for i := 0; i < len(rows); i++ {
+		col := strings.Split(rows[i], "")
+		for j := 0; j < len(col); j++ {
+			col[j] = strings.TrimSpace(col[j])
+			if col[j] != "" {
+				matrix[i] = append(matrix[i], col[j])
+			}
+		}
+	}
+	return matrix
+}

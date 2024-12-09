@@ -2,26 +2,10 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/alecthomas/assert"
 )
-
-func stringToMatrix(str string) [][]string {
-	rows := strings.Split(str, "\n")
-	matrix := make([][]string, len(rows))
-	for i := 0; i < len(rows); i++ {
-		col := strings.Split(rows[i], "")
-		for j := 0; j < len(col); j++ {
-			col[j] = strings.TrimSpace(col[j])
-			if col[j] != "" {
-				matrix[i] = append(matrix[i], col[j])
-			}
-		}
-	}
-	return matrix
-}
 
 func TestDay4_2_info(t *testing.T) {
 
@@ -92,6 +76,7 @@ func TestDay4_2(t *testing.T) {
 		}
 	}
 	fmt.Println(count)
+	assert.Equal(t, count, 1933)
 }
 func TestMaskStringMatrix(t *testing.T) {
 
@@ -126,18 +111,18 @@ func TestMaskStringMatrix(t *testing.T) {
 
 func TestDay4_1_mask(t *testing.T) {
 
-	str := `MMMSXXMASM
-    MSAMXMSMSA
-    AMXSXMAAMM
-    MSAMASMSMX
-    XMASAMXAMM
-    XXAMMXXAMA
-    SMSMSASXSS
-    SAXAMASAAA
-    MAMMMXMMMM
-    MXMXAXMASX`
+	// str := `MMMSXXMASM
+	// MSAMXMSMSA
+	// AMXSXMAAMM
+	// MSAMASMSMX
+	// XMASAMXAMM
+	// XXAMMXXAMA
+	// SMSMSASXSS
+	// SAXAMASAAA
+	// MAMMMXMMMM
+	// MXMXAXMASX`
 
-	str, _ = loadInputFromFile("4")
+	str, _ := loadInputFromFile("4")
 	matrix := stringToMatrix(str)
 	count := 0
 
