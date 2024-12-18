@@ -30,8 +30,9 @@ func TestDay6_1(t *testing.T) {
 
 	totalSteps := 0
 	fmt.Println(pos)
+
 	for {
-		pos.walk(matrix, dir)
+		pos.walk(matrix, dir, "X")
 
 		if pos.row == -1 {
 			break
@@ -63,116 +64,64 @@ func TestDay6_2(t *testing.T) {
 	// str, _ = loadInputFromFile("6")
 	matrix := stringToMatrix(str)
 
-	initDir := Direction{-1, 0}
-	dir := initDir
+	dir := Direction{-1, 0}
 
-	var p path
+	startPos := findStrInMatrix(matrix, "^")
 
-	initPos := findStrInMatrix(matrix, "^")
-	p.curPos = initPos
-	p.add(p.curPos)
+	// record path
+	path := []Pos{startPos}
 
-	obstructions := 0
-
-	fmt.Println(p.curPos)
-
-mainLoop1:
 	for {
-		for {
-			p.walk(matrix, dir) // TO DO one step et a time
-			p.add(p.curPos)
-			if p.isOutOfBound {
-				break mainLoop1 // breaks out of outer loop
-			}
-			if p.hasHitMarker {
-				break // breaks inner loop only
-			}
+		p := startPos.walk(matrix, dir, "X")
+		path = append(path, p...)
+		if startPos.row == -1 {
+			break
 		}
 		dir.rotateRight()
 	}
 
-	for i := 2; i < len(p.positions); i++ {
+	startDir := Direction{-1, 0}
 
-		matrixAlt := matrix
-		p.curPos = initPos
-		dir = initDir
+	for i := 1; i < len(path); i++ {
 
-		matrixAlt[p.positions[i].row][p.positions[i].col] = "#"
+		matrix[path[i].row][path[i].col] = "#"
 
-	mainloop2:
-		for {
-
-			for {
-				p.walk(matrix, dir)
-
-				// if pos & dir are init then loop
-				if p.curPos == initPos && dir == initDir {
-					fmt.Println("found loop", p.positions[i])
-					obstructions++
-				}
-
-				if p.isOutOfBound {
-					fmt.Println("out of bounds")
-					break mainloop2
-				}
-				if p.hasHitMarker {
-					break // breaks inner loop only
-				}
-			}
-
-			dir.rotateRight()
-		}
-	}
-
-	fmt.Println(obstructions)
-
-	assert.Equal(t, obstructions, 6)
-	// fmt.Println(matrix)
-
-	// record Path
-	// brute force every point on path
-
-}
-
-type path struct {
-	isOutOfBound bool
-	hasHitMarker bool
-	curPos       Pos
-	positions    []Pos
-}
-
-func (p *path) walk(matrix [][]string, dir Direction) {
-
-	var str string
-	p.isOutOfBound = false
-	p.hasHitMarker = false
-
-	if p.curPos.row < 1 || p.curPos.col < 1 || p.curPos.row >= len(matrix)-1 || p.curPos.col >= len(matrix[0])-1 {
-		p.isOutOfBound = true
-		return
-	}
-
-	str = matrix[p.curPos.row+dir.row][p.curPos.col+dir.col]
-
-	if str == "#" {
-		p.hasHitMarker = true
-		return
-	}
-
-	p.curPos.row += dir.row
-	p.curPos.col += dir.col
-
-}
-
-func (p *path) add(pos Pos) {
-	if len(p.positions) != 0 {
-		if p.curPos != p.positions[len(p.positions)-1] {
-			p.positions = append(p.positions, pos)
+		if makeTestWalk(startPos, matrix, startDir) {
+			fmt.Println("Loop detected")
 		}
 
-	} else {
-		p.positions = append(p.positions, pos)
+		matrix[path[i].row][path[i].col] = "."
+
 	}
+	// assert.Equal(t, obstructions, 6)
+
+}
+
+func makeTestWalk(pos Pos, matrix [][]string, dir Direction) bool {
+
+	escape := 0
+	for {
+
+		pos.walk(matrix, dir, "O")
+		if pos.row == -1 {
+			return false
+		}
+
+		// check for loop
+		// if matrix[pos.row][pos.col] == "p" {
+		// 	fmt.Println("Loop detected")
+		// 	return true
+		// }
+
+		dir.rotateRight()
+
+		escape++
+
+		if escape > 10000 {
+			break
+		}
+	}
+	return true
 }
 
 func countOccurances(matrix [][]string, str string) int {
@@ -214,9 +163,10 @@ func (dir *Direction) rotateRight() {
 	}
 }
 
-func (pos *Pos) walk(matrix [][]string, dir Direction) {
+func (pos *Pos) walk(matrix [][]string, dir Direction, marker string) []Pos {
 
 	var str string
+	path := []Pos{}
 
 	for {
 
@@ -234,10 +184,11 @@ func (pos *Pos) walk(matrix [][]string, dir Direction) {
 		pos.row += dir.row
 		pos.col += dir.col
 
-		matrix[pos.row][pos.col] = "X"
+		matrix[pos.row][pos.col] = marker
+		path = append(path, Pos{pos.row, pos.col})
 
 	}
-
+	return path
 }
 
 func (pos *Pos) peek(matrix [][]string, dir Direction) {

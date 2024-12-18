@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+
+	"github.com/alecthomas/assert"
 )
 
 func TestDay10_1(t *testing.T) {
@@ -21,20 +23,22 @@ func TestDay10_1(t *testing.T) {
 
 	matrix := stringToMatrix(str)
 
-	gt := newGrodTree(len(matrix[0]), len(matrix))
+	gt := newGridTree(len(matrix[0]), len(matrix))
 
-	// build the grid
-	for i, row := range matrix {
-		for j, col := range row {
-			val := -1
-			if col != "." {
-				val, _ = strconv.Atoi(col)
-			}
-			pn := &pathNode{row: i, col: j, val: val}
-			gt.addGridNode(pn)
-		}
-	}
+	gt.buildGrid(matrix)
 
+	gt.linkNodes()
+
+	count, distinct := gt.findPaths()
+
+	fmt.Println(count, distinct)
+
+	assert.Equal(t, count, 659)
+	assert.Equal(t, distinct, 1463)
+
+}
+
+func (gt *gridTree) linkNodes() {
 	for i, row := range gt.grid {
 		for j := range row {
 			if isNumber(gt.grid[i][j].val) {
@@ -46,14 +50,12 @@ func TestDay10_1(t *testing.T) {
 
 		}
 	}
-
-	gt.findPaths()
-
 }
 
-func (gt *gridTree) findPaths() {
+func (gt *gridTree) findPaths() (int, int) {
 
 	count := 0
+	distinct := 0
 
 	for _, root := range gt.roots {
 
@@ -70,22 +72,38 @@ func (gt *gridTree) findPaths() {
 			}
 			if current.val == 9 {
 				gt.addUniqueEndNode(current)
+				distinct++
 			}
 		}
 
+		// fmt.Println("distinct", distinct)
 		count += len(gt.endPoints)
-		fmt.Println("endPoints", len(gt.endPoints))
+		// fmt.Println("endPoints", len(gt.endPoints))
 		gt.endPoints = []*pathNode{}
 
 	}
-	fmt.Println("rootValues", count)
+	return count, distinct
+}
+
+func (gt *gridTree) buildGrid(matrix [][]string) {
+
+	for i, row := range matrix {
+		for j, col := range row {
+			val := -1
+			if col != "." {
+				val, _ = strconv.Atoi(col)
+			}
+			pn := &pathNode{row: i, col: j, val: val}
+			gt.addGridNode(pn)
+		}
+	}
 }
 
 func isNumber(s int) bool {
 	return s >= 0 && s <= 9
 }
 
-func newGrodTree(width, height int) *gridTree {
+func newGridTree(width, height int) *gridTree {
 
 	gt := &gridTree{
 		grid: make([][]*pathNode, height),
